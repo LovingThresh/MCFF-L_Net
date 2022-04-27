@@ -5,7 +5,7 @@
 # @File    : Teacher.py
 # @Software: PyCharm
 
-from Segmentation_with_Three_Channels import ResnetGenerator_with_ThreeChannel
+from Model.Segmentation_with_Three_Channels import ResnetGenerator_with_ThreeChannel
 
 
 # The  Teacher model has enough parameters to guarantee the richness of information

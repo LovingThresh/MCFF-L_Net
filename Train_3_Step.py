@@ -16,6 +16,7 @@ import tensorflow.keras as keras
 from I_data.get_data_label import *
 
 
+# You Choose any batch size and epoch
 batch_size = 1
 epoch = 100
 

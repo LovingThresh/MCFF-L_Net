@@ -6,7 +6,7 @@
 # @Software: PyCharm
 
 
-from Segmentation_with_Three_Channels import ResnetGenerator_with_ThreeChannel
+from Model.Segmentation_with_Three_Channels import ResnetGenerator_with_ThreeChannel
 
 
 # The  Student model has a structure similar to that of the teacher model

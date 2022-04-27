@@ -138,6 +138,7 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
         # When model is Training as teacher model, we need Dropout Layer to restrain overfit
         if not StudentNet:
             h = keras.layers.Dropout(0.5)(h)
+        dim //= 2
         h = keras.layers.Conv2DTranspose(dim, 3, strides=2, padding='same', use_bias=False)(h)
         h = Norm()(h)
         h = tf.nn.relu(h)

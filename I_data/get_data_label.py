@@ -10,8 +10,6 @@ import numpy as np
 import tensorflow as tf
 
 train_teacher_y_name = ''
-label = object
-image = object
 Aug_image = object
 Aug_label = object
 teacher_label = object
@@ -51,7 +49,6 @@ def get_data(path=r'I:\Image Processing\train.txt',
 def get_dataset_label(lines, batch_size,
                       A_img_paths=r'I:\Image Processing\Rebuild_Image_95/',
                       B_img_paths=r'I:\Image Processing\Mix_img\95\label/',
-                      C_img_paths=r'I:\Image Processing\Mix_img\95\label/',
                       shuffle=True, KD=False, training=False, Augmentation=False):
     """
         生成器， 读取图片， 并对图片进行处理， 生成（样本，标签）
@@ -67,19 +64,18 @@ def get_dataset_label(lines, batch_size,
         :return:  返回（样本， 标签）
         """
 
-    global train_teacher_y_name, seed, teacher_label, label, image
+    global train_teacher_y_name, seed
     numbers = len(lines)
     read_line = 0
+    if shuffle:
+        np.random.shuffle(lines)
 
     while True:
 
         x_train = []
         y_train = []
-        y_teacher_train = []
 
         for t in range(batch_size):
-            if shuffle:
-                np.random.shuffle(lines)
 
             # 1.Get the filename
             train_x_name = lines[read_line].split(',')[0]
@@ -88,12 +84,15 @@ def get_dataset_label(lines, batch_size,
             img = cv2.imread(A_img_paths + train_x_name)
             img_array = np.array(img)
             size = (img_array.shape[0], img_array.shape[1])
-            img_teacher_array = cv2.imread(C_img_paths + train_teacher_y_name, cv2.IMREAD_GRAYSCALE)
+            img_array = cv2.resize(img_array, size)
             img_array = img_array / 255.0  # 标准化
             img_array = img_array * 2 - 1
             x_train.append(img_array)
 
             train_y_name = lines[read_line].split(',')[1].replace('\n', '')
+            img_array = cv2.imread(B_img_paths + train_y_name)
+            img_array = cv2.resize(img_array, size)
+            img_array = cv2.dilate(img_array, kernel=(3, 3), iterations=3)
             labels = np.zeros((img_array.shape[0], img_array.shape[1], 2), np.int)
 
             # 3.Image channels separation
@@ -107,6 +106,7 @@ def get_dataset_label(lines, batch_size,
             read_line = (read_line + 1) % numbers
 
         # 5.Data Augmentation
+        image, label = np.array(x_train, dtype=np.float32), np.array(y_train, dtype=np.float32)
         if training:
 
             if Augmentation:
@@ -185,10 +185,13 @@ def get_teacher_dataset_label(
     read_line = 0
 
     while True:
+
+        image_label = []
+        y_5_train = []
         x_train = []
-        y_train = []
 
         for t in range(batch_size):
+            y_train = []
             if shuffle:
                 np.random.shuffle(lines)
 
@@ -240,7 +243,7 @@ def get_teacher_dataset_label(
             y_train.append(mix_label)
 
             y_train.append(real_label)
-
+            y_5_train.append(np.array(y_train))
             read_line = (read_line + 1) % numbers
 
-        yield np.array(x_train), np.array(y_train)
+        yield np.array(x_train), y_5_train
