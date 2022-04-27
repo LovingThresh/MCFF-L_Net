@@ -17,7 +17,6 @@ def Teacher_model():
                                               n_blocks=8,
                                               norm='instance_norm',
                                               attention=True,
-                                              ShallowConnect=False,
                                               Temperature=0,
                                               StudentNet=False,
                                               mix_for_real_Temperature=1)

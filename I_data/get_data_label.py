@@ -10,6 +10,8 @@ import numpy as np
 import tensorflow as tf
 
 train_teacher_y_name = ''
+label = object
+image = object
 Aug_image = object
 Aug_label = object
 teacher_label = object
@@ -65,7 +67,7 @@ def get_dataset_label(lines, batch_size,
         :return:  返回（样本， 标签）
         """
 
-    global train_teacher_y_name, seed, teacher_label
+    global train_teacher_y_name, seed, teacher_label, label, image
     numbers = len(lines)
     read_line = 0
 
@@ -75,16 +77,14 @@ def get_dataset_label(lines, batch_size,
         y_train = []
         y_teacher_train = []
 
-        # 一次获取batch——size大小的数据
-
         for t in range(batch_size):
             if shuffle:
                 np.random.shuffle(lines)
 
-            # 1. 获取训练文件的名字
+            # 1.Get the filename
             train_x_name = lines[read_line].split(',')[0]
 
-            # 根据图片名字读取图片
+            # 2.Read the image
             img = cv2.imread(A_img_paths + train_x_name)
             img_array = np.array(img)
             size = (img_array.shape[0], img_array.shape[1])
@@ -93,110 +93,83 @@ def get_dataset_label(lines, batch_size,
             img_array = img_array * 2 - 1
             x_train.append(img_array)
 
-            # 2.1 获取训练样本标签的名字
             train_y_name = lines[read_line].split(',')[1].replace('\n', '')
-
-            # 2.2 获取Teacher训练样本标签的名字,此处将文件的后缀.png改成.jpg就能转移到相应的Teacher_Label了
-            if KD:
-                train_teacher_y_name = lines[read_line].split(',')[0].replace('\n', '')[:-4] + '.jpg'
-
-            # 根据图片名字读取图片
-            img_array = cv2.imread(B_img_paths + train_y_name)
-            if img_array.shape == (600, 800, 3):
-                img_array = cv2.dilate(img_array, kernel=(5, 5), iterations=5)
-            img_array = cv2.dilate(img_array, kernel=(3, 3), iterations=5)
-            if KD:
-                img_teacher_array = cv2.imread(C_img_paths + train_teacher_y_name, cv2.IMREAD_GRAYSCALE)
-
             labels = np.zeros((img_array.shape[0], img_array.shape[1], 2), np.int)
 
-            # 相当于合并的图层分层！！！！
+            # 3.Image channels separation
             labels[:, :, 0] = (img_array[:, :, 1] == 255).astype(int).reshape(size)
             labels[:, :, 1] = (img_array[:, :, 1] != 255).astype(int).reshape(size)
             labels = labels.astype(np.float32)
-            if KD:
-                teacher_label = ((img_teacher_array - 127.5) / 127.5).astype(np.float32).reshape(512, 512, 1)
-                teacher_label_opposite = 1 - teacher_label
-                teacher_label = np.concatenate([teacher_label, teacher_label_opposite], axis=2)
 
             y_train.append(labels)
-            if KD:
-                y_teacher_train.append(teacher_label)
 
-            # 遍历所有数据，记录现在所处的行， 读取完所有数据后，read_line=0,打乱重新开始
+            # 4.Iterate over all data
             read_line = (read_line + 1) % numbers
 
-        if not KD:
-            image, label = np.array(x_train, dtype=np.float32), np.array(y_train, dtype=np.float32)
+        # 5.Data Augmentation
+        if training:
 
-            if training:
+            if Augmentation:
+                seed = random.choice([0, 0, 0, 1, 2, 3, 4, 5, 6])
+            if not Augmentation:
+                seed = random.choice([0, 0, 0])
 
-                if Augmentation:
-                    seed = random.choice([0, 0, 0, 1, 2, 3, 4, 5, 6])
-                if not Augmentation:
-                    seed = random.choice([0, 0, 0])
+            def DataAugmentation(row_image, row_label, D_seed=0):
 
-                def DataAugmentation(row_image, row_label, D_seed=0):
+                global Aug_image, Aug_label
+                in_seed = np.random.randint(0, 6)
 
-                    global Aug_image, Aug_label
-                    in_seed = np.random.randint(0, 6)
+                if D_seed == 0:
+                    Aug_image = row_image
+                    Aug_label = row_label
 
-                    if D_seed == 0:
-                        Aug_image = row_image
-                        Aug_label = row_label
+                if D_seed == 1:
+                    Aug_image = tf.image.random_flip_left_right(row_image, seed=in_seed)
+                    Aug_label = tf.image.random_flip_left_right(row_label, seed=in_seed)
+                    Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
+                    Aug_label = np.array(np.reshape(Aug_label, row_label.shape))
 
-                    if D_seed == 1:
-                        Aug_image = tf.image.random_flip_left_right(row_image, seed=in_seed)
-                        Aug_label = tf.image.random_flip_left_right(row_label, seed=in_seed)
-                        Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
-                        Aug_label = np.array(np.reshape(Aug_label, row_label.shape))
+                if D_seed == 2:
+                    Aug_image = tf.image.random_flip_up_down(row_image, seed=in_seed)
+                    Aug_label = tf.image.random_flip_up_down(row_label, seed=in_seed)
+                    Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
+                    Aug_label = np.array(np.reshape(Aug_label, row_label.shape))
 
-                    if D_seed == 2:
-                        Aug_image = tf.image.random_flip_up_down(row_image, seed=in_seed)
-                        Aug_label = tf.image.random_flip_up_down(row_label, seed=in_seed)
-                        Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
-                        Aug_label = np.array(np.reshape(Aug_label, row_label.shape))
+                if D_seed == 3:
+                    Aug_image = tf.image.random_saturation(row_image, 0.2, 0.8)
+                    Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
+                    Aug_label = row_label
 
-                    if D_seed == 3:
-                        Aug_image = tf.image.random_saturation(row_image, 0.2, 0.8)
-                        Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
-                        Aug_label = row_label
+                if D_seed == 4:
+                    Aug_image = tf.image.random_contrast(row_image, 0.2, 0.8)
+                    Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
+                    Aug_label = row_label
 
-                    if D_seed == 4:
-                        Aug_image = tf.image.random_contrast(row_image, 0.2, 0.8)
-                        Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
-                        Aug_label = row_label
+                if D_seed == 5:
+                    Aug_image = tf.image.random_brightness(row_image, 0.5)
+                    Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
+                    Aug_label = row_label
 
-                    if D_seed == 5:
-                        Aug_image = tf.image.random_brightness(row_image, 0.5)
-                        Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
-                        Aug_label = row_label
+                if D_seed == 6:
+                    Aug_image = tf.image.random_hue(row_image, 0.5)
+                    Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
+                    Aug_label = row_label
 
-                    if D_seed == 6:
-                        Aug_image = tf.image.random_hue(row_image, 0.5)
-                        Aug_image = np.array(np.reshape(Aug_image, row_image.shape))
-                        Aug_label = row_label
+                return Aug_image, Aug_label
 
-                    return Aug_image, Aug_label
+            image, label = DataAugmentation(image, label, D_seed=seed)
 
-                image, label = DataAugmentation(image, label, D_seed=seed)
+            data = image, [label, label, label, label]
 
-                data = image, [label, label, label, label]
+            yield data
 
-                yield data
+        else:
+            data = image, [label, label, label, label]
 
-            else:
-                data = image, [label, label, label, label]
-
-                yield data
-
-            # yield np.array(x_train), np.array(y_train)
-        if KD:
-            yield np.array(x_train), [np.array(y_train), np.array(y_teacher_train)]
+            yield data
 
 
-def get_teacher_dataset_label \
-                (
+def get_teacher_dataset_label(
                 lines,
                 A_img_paths=r'L:\ALASegmentationNets\Data\Stage_4\train\img/',
                 B_img_paths=r'L:\ALASegmentationNets\Data\Stage_4\train\mask/',
@@ -219,23 +192,23 @@ def get_teacher_dataset_label \
             if shuffle:
                 np.random.shuffle(lines)
 
+            # 1.Get the filename
             train_x_name = lines[read_line].split(',')[0]
 
-            # 根据图片名字读取图片
+            # 2.Read the image and label
             img = cv2.imread(A_img_paths + train_x_name)
             size = (img.shape[0], img.shape[1])
 
-            img_array = img / 255.0  # 标准化
+            img_array = img / 255.0
             img_array = img_array * 2 - 1
             x_train.append(img_array)
 
-            # 根据相应标签载入真实标签
             train_y_name = lines[read_line].split(',')[1].replace('\n', '')
             img_array = cv2.imread(B_img_paths + train_y_name)
             img_array = cv2.dilate(img_array, kernel=(3, 3), iterations=3)
 
+            # 3.Image channels separation
             labels = np.zeros((img_array.shape[0], img_array.shape[1], 2), np.int)
-
             labels[:, :, 0] = (img_array[:, :, 1] == 255).astype(int).reshape(size)
             labels[:, :, 1] = (img_array[:, :, 1] != 255).astype(int).reshape(size)
             real_label = labels.astype(np.float32)
@@ -243,18 +216,18 @@ def get_teacher_dataset_label \
                 real_label = tf.nn.softmax(real_label / temperature)
                 real_label = np.array(real_label, dtype=np.float32)
 
-            # 根据相应标签载入相应的老师标签
+            # 4.Get distillation data
             def get_label(img_paths):
 
-                label = cv2.imread(img_paths + train_x_name[:-4] + '.png')
-                label = label[:, :, 0:1]
-                label = label / 255.0
+                T_label = cv2.imread(img_paths + train_x_name[:-4] + '.png')
+                T_label = T_label[:, :, 0:1]
+                T_label = T_label / 255.0
 
-                label_T = 1 - label
-                label = np.concatenate([label, label_T], axis=-1)
+                label_T = 1 - T_label
+                T_label = np.concatenate([T_label, label_T], axis=-1)
 
-                label = np.array(label)
-                return label
+                T_label = np.array(T_label)
+                return T_label
 
             h_label = get_label(h_img_paths)
             x_label = get_label(x_img_paths)

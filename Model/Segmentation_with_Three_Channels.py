@@ -30,7 +30,6 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
                                       n_blocks=8,
                                       norm='instance_norm',
                                       attention=False,
-                                      ShallowConnect=False,
                                       Temperature=0,
                                       StudentNet=False,
                                       mix_for_real_Temperature=1):
@@ -39,12 +38,12 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
     if attention:
         output_channels = output_channels + 1
 
-    # 受保护的用法
     def _residual_block(x_res):
+
+        # ------------------------------------MCL-----------------------------------------
         x_dim = x_res.shape[-1]
         h_res = x_res
 
-        # 为什么这里不用padding参数呢？使用到了‘REFLECT’
         h_res = tf.pad(h_res, [[0, 0], [1, 1], [1, 1], [0, 0]], mode='CONSTANT')
 
         h_res = keras.layers.Conv2D(x_dim, 3, padding='valid', use_bias=False)(h_res)
@@ -54,6 +53,22 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
         h_res = tf.pad(h_res, [[0, 0], [1, 1], [1, 1], [0, 0]], mode='CONSTANT')
         h_res = keras.layers.Conv2D(x_dim, 3, padding='valid', use_bias=False)(h_res)
         h_res = Norm()(h_res)
+
+        # ------------------------------------MCLD-----------------------------------------
+        # x_dim = x_res.shape[-1]
+        # h_res = x_res
+        #
+        # h_res = tf.pad(h_res, [[0, 0], [1, 1], [1, 1], [0, 0]], mode='CONSTANT')
+        #
+        # h_res = keras.layers.DepthwiseConv2D(3, padding='valid', use_bias=False)(h_res)
+        # h_res = keras.layers.Conv2D(x_dim, 1, padding='same', use_bias=False)(h_res)
+        # h_res = Norm()(h_res)
+        # h_res = tf.nn.relu(h_res)
+        #
+        # h_res = tf.pad(h_res, [[0, 0], [1, 1], [1, 1], [0, 0]], mode='CONSTANT')
+        # h_res = keras.layers.DepthwiseConv2D(3, padding='valid', use_bias=False)(h_res)
+        # h_res = keras.layers.Conv2D(x_dim, 1, padding='same', use_bias=False)(h_res)
+        # h_res = Norm()(h_res)
 
         return keras.layers.add([x_res, h_res])
 
@@ -86,8 +101,6 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
     h = keras.layers.Conv2D(dim, 7, padding='same', use_bias=False)(h)
     h = Norm()(h)
     h = tf.nn.relu(h)
-    if ShallowConnect:
-        f1 = h
 
     # 2
     for i in range(n_downsamplings):
@@ -113,26 +126,15 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
         h = keras.layers.Conv2D(dim, 3, strides=2, padding='same', use_bias=False)(h)
         h = Norm()(h)
         h = tf.nn.relu(h)
-        if (i == 0) & ShallowConnect:
-            f2 = h
 
-    if ShallowConnect:
-        f3 = h
     # 3
     for _ in range(n_blocks):
         h = _residual_block(h)
         x = _residual_block(x)
         y = _residual_block(y)
 
-    if ShallowConnect:
-        h = keras.layers.concatenate([h, f3], axis=-1)
-
     # 4
     for _ in range(n_downsamplings):
-        if (_ == 1) & ShallowConnect:
-            h = keras.layers.concatenate([h, f2], axis=-1)
-        dim //= 2
-
         # When model is Training as teacher model, we need Dropout Layer to restrain overfit
         if not StudentNet:
             h = keras.layers.Dropout(0.5)(h)
@@ -153,28 +155,22 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
         y = tf.nn.relu(y)
 
     # 5
-    if ShallowConnect:
-        h = keras.layers.concatenate([h, f1], axis=-1)
+    h = keras.layers.Conv2D(output_channels, 7, padding='same', use_bias=False)(h)
+
     x = tf.pad(x, [[0, 0], [3, 3], [3, 3], [0, 0]], mode='CONSTANT')
+    x = keras.layers.Conv2D(output_channels, (3, 3), strides=(1, 1), padding='valid', dilation_rate=(3, 3),
+                            use_bias=False)(x)
+    x = keras.layers.Conv2D(output_channels, (3, 3), strides=(1, 1), padding='same', dilation_rate=(2, 2),
+                            use_bias=False)(x)
 
-    if input_shape == (227, 227, 3):
-        h = keras.layers.Conv2D(output_channels, 8, padding='valid')(h)
-    else:
-        h = keras.layers.Conv2D(output_channels, 7, padding='same', use_bias=False)(h)
+    y1 = keras.layers.Conv2D(output_channels, (7, 3), strides=1, padding='same', use_bias=False)(y)
+    y1 = keras.layers.Conv2D(output_channels, (3, 1), strides=1, padding='same', use_bias=False)(y1)
+    y2 = keras.layers.Conv2D(output_channels, (3, 7), strides=1, padding='same', use_bias=False)(y)
+    y2 = keras.layers.Conv2D(output_channels, (1, 3), strides=1, padding='same', use_bias=False)(y2)
+    y = keras.layers.Add()([y1, y2])
+    y = keras.layers.Conv2D(output_channels, 7, padding='same', use_bias=False)(y)
 
-        x = keras.layers.Conv2D(output_channels, (3, 3), strides=(1, 1), padding='valid', dilation_rate=(3, 3),
-                                use_bias=False)(x)
-        x = keras.layers.Conv2D(output_channels, (3, 3), strides=(1, 1), padding='same', dilation_rate=(2, 2),
-                                use_bias=False)(x)
-
-        y1 = keras.layers.Conv2D(output_channels, (7, 3), strides=1, padding='same', use_bias=False)(y)
-        y1 = keras.layers.Conv2D(output_channels, (3, 1), strides=1, padding='same', use_bias=False)(y1)
-        y2 = keras.layers.Conv2D(output_channels, (3, 7), strides=1, padding='same', use_bias=False)(y)
-        y2 = keras.layers.Conv2D(output_channels, (1, 3), strides=1, padding='same', use_bias=False)(y2)
-        y = keras.layers.Add()([y1, y2])
-        y = keras.layers.Conv2D(output_channels, 7, padding='same', use_bias=False)(y)
-
-        mix = keras.layers.Add()([h, y, x])
+    mix = keras.layers.Add()([h, y, x])
     if attention:
         attention_mask = tf.sigmoid(h[:, :, :, 0])
         content_mask = h[:, :, :, 1:]
@@ -199,7 +195,6 @@ def ResnetGenerator_with_ThreeChannel(input_shape=(448, 448, 3),
         attention_mask = tf.expand_dims(attention_mask, axis=3)
         attention_mask = tf.concat([attention_mask, attention_mask], axis=3)
         mix = content_mask * attention_mask
-    # h = tf.tanh(h)
 
     if (Temperature != 0) & StudentNet:
         h = h / Temperature
