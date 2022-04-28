@@ -22,28 +22,28 @@ epoch = 100
 # ----------------------------------------------------------------------------------
 #                              Step 1 Teacher Training
 # ----------------------------------------------------------------------------------
-train_lines, num_train = get_data(path=r'L:\ALASegmentationNets_v2\Data\Stage_4\train.txt', training=False)
-validation_lines, num_val = get_data(path=r'L:\ALASegmentationNets_v2\Data\Stage_4\val.txt', training=False)
-test_lines, num_test = get_data(path=r'L:\ALASegmentationNets_v2\Data\Stage_4\test.txt', training=False)
+train_lines, num_train = get_data(path=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train.txt', training=False)
+validation_lines, num_val = get_data(path=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val.txt', training=False)
+test_lines, num_test = get_data(path=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test.txt', training=False)
 
 train_dataset = get_dataset_label(train_lines, batch_size,
-                                  A_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\img/',
-                                  B_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\mask/',
+                                  A_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\img/',
+                                  B_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\mask/',
                                   shuffle=True,
                                   KD=False,
                                   training=True,
                                   Augmentation=True)
 validation_dataset = get_dataset_label(validation_lines, batch_size,
-                                       A_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\img/',
-                                       B_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\mask/',
+                                       A_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\img/',
+                                       B_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\mask/',
                                        shuffle=False,
                                        KD=False,
                                        training=False,
                                        Augmentation=False)
 
 test_dataset = get_dataset_label(test_lines, batch_size,
-                                 A_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\img/',
-                                 B_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\mask/',
+                                 A_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\img/',
+                                 B_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\mask/',
                                  shuffle=False,
                                  KD=False,
                                  training=False,

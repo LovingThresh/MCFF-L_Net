@@ -30,29 +30,29 @@ epoch = 100
 # The key parameter is the temperature
 # This example is standardKD MCL
 
-train_lines, num_train = get_data(path=r'L:\ALASegmentationNets_v2\Data\Stage_4\train.txt', training=False)
-validation_lines, num_val = get_data(path=r'L:\ALASegmentationNets_v2\Data\Stage_4\val.txt', training=False)
-test_lines, num_test = get_data(path=r'L:\ALASegmentationNets_v2\Data\Stage_4\test.txt', training=False)
+train_lines, num_train = get_data(path=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train.txt', training=False)
+validation_lines, num_val = get_data(path=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val.txt', training=False)
+test_lines, num_test = get_data(path=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test.txt', training=False)
 
 train_dataset = get_teacher_dataset_label(train_lines,
-                                          A_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\img/',
-                                          B_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\mask/',
-                                          h_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_h\label/',
-                                          x_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_x\label/',
-                                          y_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_y\label/',
-                                          mix_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_mix\label/',
+                                          A_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\img/',
+                                          B_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\mask/',
+                                          h_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_h\label/',
+                                          x_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_x\label/',
+                                          y_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_y\label/',
+                                          mix_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\train\teacher_mask\teacher_label_mix\label/',
                                           batch_size=batch_size,
                                           shuffle=True,
                                           temperature=0
                                           )
 
 validation_dataset = get_teacher_dataset_label(validation_lines,
-                                               A_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\img/',
-                                               B_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\mask/',
-                                               h_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_h\label/',
-                                               x_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_x\label/',
-                                               y_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_y\label/',
-                                               mix_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_mix\label/',
+                                               A_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\img/',
+                                               B_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\mask/',
+                                               h_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_h\label/',
+                                               x_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_x\label/',
+                                               y_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_y\label/',
+                                               mix_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\val\teacher_mask\teacher_label_mix\label/',
                                                batch_size=batch_size,
                                                shuffle=False,
                                                temperature=0,
@@ -60,12 +60,12 @@ validation_dataset = get_teacher_dataset_label(validation_lines,
                                                )
 
 test_dataset = get_teacher_dataset_label(test_lines,
-                                         A_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\img/',
-                                         B_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\mask/',
-                                         h_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_h\label/',
-                                         x_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_x\label/',
-                                         y_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_y\label/',
-                                         mix_img_paths=r'L:\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_mix\label/',
+                                         A_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\img/',
+                                         B_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\mask/',
+                                         h_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_h\label/',
+                                         x_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_x\label/',
+                                         y_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_y\label/',
+                                         mix_img_paths=r'\root\autodl-tmp\ALASegmentationNets_v2\Data\Stage_4\test\teacher_mask\teacher_label_mix\label/',
                                          batch_size=batch_size,
                                          shuffle=False,
                                          temperature=0
