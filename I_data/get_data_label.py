@@ -186,7 +186,6 @@ def get_teacher_dataset_label(
 
     while True:
 
-        image_label = []
         y_5_train = []
         x_train = []
 
@@ -246,4 +245,4 @@ def get_teacher_dataset_label(
             y_5_train.append(np.array(y_train))
             read_line = (read_line + 1) % numbers
 
-        yield np.array(x_train), y_5_train
+        yield np.array(x_train), [i for i in np.array(y_5_train).transpose([1, 0, 2, 3, 4])]
