@@ -15,35 +15,35 @@ from Model import Teacher_model
 import tensorflow.keras as keras
 from I_data.get_data_label import *
 
-batch_size = 1
+batch_size = 2
 epoch = 100
-
+path = 'L:'
 # ----------------------------------------------------------------------------------
 #                              Step 1 Teacher Training
 # ----------------------------------------------------------------------------------
-train_lines, num_train = get_data(path='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/train.txt', training=False)
-validation_lines, num_val = get_data(path='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/val.txt',
+train_lines, num_train = get_data(path='{}/ALASegmentationNets_v2/Data/Stage_4/train.txt'.format(path), training=False)
+validation_lines, num_val = get_data(path='{}/ALASegmentationNets_v2/Data/Stage_4/val.txt'.format(path),
                                      training=False)
-test_lines, num_test = get_data(path='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/test.txt', training=False)
+test_lines, num_test = get_data(path='{}/ALASegmentationNets_v2/Data/Stage_4/test.txt'.format(path), training=False)
 
 train_dataset = get_dataset_label(train_lines, batch_size,
-                                  A_img_paths='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/train/img/',
-                                  B_img_paths='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/train/mask/',
+                                  A_img_paths='{}/ALASegmentationNets_v2/Data/Stage_4/train/img/'.format(path),
+                                  B_img_paths='{}/ALASegmentationNets_v2/Data/Stage_4/train/mask/'.format(path),
                                   shuffle=True,
                                   KD=False,
                                   training=True,
                                   Augmentation=True)
 validation_dataset = get_dataset_label(validation_lines, batch_size,
-                                       A_img_paths='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/val/img/',
-                                       B_img_paths='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/val/mask/',
+                                       A_img_paths='{}/ALASegmentationNets_v2/Data/Stage_4/val/img/'.format(path),
+                                       B_img_paths='{}/ALASegmentationNets_v2/Data/Stage_4/val/mask/'.format(path),
                                        shuffle=False,
                                        KD=False,
                                        training=False,
                                        Augmentation=False)
 
 test_dataset = get_dataset_label(test_lines, batch_size,
-                                 A_img_paths='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/test/img/',
-                                 B_img_paths='/root/autodl-tmp/ALASegmentationNets_v2/Data/Stage_4/test/mask/',
+                                 A_img_paths='{}/ALASegmentationNets_v2/Data/Stage_4/test/img/'.format(path),
+                                 B_img_paths='{}/ALASegmentationNets_v2/Data/Stage_4/test/mask/'.format(path),
                                  shuffle=False,
                                  KD=False,
                                  training=False,
@@ -80,6 +80,7 @@ print(profile)
 # The model of paper is trained on Stage_4 Dataset
 
 # learning rates are from [5e-5, 2e-5, 1e-5, 5e-6, 3e-6, 1e-6]
+a = train_dataset.__next__()
 initial_learning_rate = 5e-5
 
 optimizer = keras.optimizers.RMSprop(initial_learning_rate)
