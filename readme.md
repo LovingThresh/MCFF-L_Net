@@ -67,11 +67,11 @@ Down from [Nvidia](https://developer.nvidia.com/zh-cn/tensorrt)
 ### Support (Coming Soon)
 the original dataset :
 
-the distillation datasets (**Temperature**==10 The Best dataset):
+the distillation datasets (**Temperature**=10 The Best dataset):
 
-the distillation datasets (**Temperature**==5):
+the distillation datasets (**Temperature**=5):
 
-the distillation datasets (**Temperature**==15):
+the distillation datasets (**Temperature**=15):
 
 the model weight and Loading method:
 
