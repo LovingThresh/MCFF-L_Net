@@ -37,20 +37,20 @@ Multi-path Convolution Feature Fusion (MCFF) Model
 
 ### How to train?
 
-1. Train teacher model with the original dataset (See Train_1_Step.py) --> Get the trained teacher model (Note dataset path!)
-` python Train_1_Step.py` 
-2. Chang the **Temperature** and generate the distillation label from four outputs (See Train_2_Step.py) --> Get the distillation datasets for training student model
+1. Train teacher model with the original dataset (See Train_1_Step.py) --> Get the trained teacher model (Note dataset path!)  
+` python Train_1_Step.py`
+2. Chang the **Temperature** and generate the distillation label from four outputs (See Train_2_Step.py) --> Get the distillation datasets for training student model  
 ` python Train_2_Step.py` 
-3. Train teacher model with the distillation dataset (See Train_3_Step.py) --> Get the trained student model
+3. Train teacher model with the distillation dataset (See Train_3_Step.py) --> Get the trained student model  
 ` python Train_3_Step.py` 
 4. Keep only the Mix-Label Output of the student model
-5. model --> ONNX --> TensorRT  (TensorRT.py) Please perform this operation on the appropriate device
+5. model --> ONNX --> TensorRT  (TensorRT.py) Please perform this operation on the appropriate device  
 ` python TensorRT.py` 
 6. Try to use the advanced features in TensorRT for further quantification and optimization
 7. Deployment!
-8. Local Deployment (camera.py) Note the TensorRT file path!
+8. Local Deployment (camera.py) Note the TensorRT file path!  
 ` python camera.py` 
-9. Cloud Deployment (PC.py) Remote transfer of segmentation results from the embedded device to the corresponding device
+9. Cloud Deployment (PC.py) Remote transfer of segmentation results from the embedded device to the corresponding device  
 ` python PC.py` 
 
 ---
