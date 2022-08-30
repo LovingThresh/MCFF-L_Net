@@ -36,6 +36,7 @@ Multi-path Convolution Feature Fusion (MCFF) Model
 ---
 
 ### How to train?
+
 1. Train teacher model with the original dataset (See Train_1_Step.py) --> Get the trained teacher model
 2. Chang the **Temperature** and generate the distillation label from four outputs (See Train_2_Step.py) --> Get the distillation datasets for training student model
 3. Train teacher model with the distillation dataset (See Train_3_Step.py) --> Get the trained student model
@@ -49,18 +50,18 @@ Multi-path Convolution Feature Fusion (MCFF) Model
 ---
 ### Requirement
 
-zmq
-numpy
-base64
-pycuda
-datetime
-tensorrt
-opencv-python
-model_profiler
-tensorflow-gpu==2.7.0
+1. zmq
+2. numpy
+3. base64
+4. pycuda
+5. datetime
+6. tensorrt
+7. opencv-python
+8. model_profiler
+9. tensorflow-gpu==2.7.0
 
-**TensorRT 8.2.0**
-
+10. **TensorRT 8.2.0**
+Down from [Nvidia](https://developer.nvidia.com/zh-cn/tensorrt)
 
 ---
 ### Support (Coming Soon)
