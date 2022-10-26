@@ -81,3 +81,9 @@ the distillation datasets (**Temperature**=15): In [Google Drove](https://drive.
 
 the model weight and Loading method:
 
+---
+### K-flod Cross Validation
+
+<img src='image/K-flod-MCL.png'>
+
+<img src='image/K-flod-MCLD.png'>
